@@ -4,7 +4,7 @@
 
 ## What Is This?
 
-This is my **learning project**—a PHP framework I built from scratch to understand how modern web frameworks work under the hood. It started as a deep dive into routing, middleware, authentication, and SQL query building.
+This is my **learning project**, a PHP framework I built from scratch to understand how modern web frameworks work under the hood. It started as a deep dive into routing, middleware, authentication, and SQL query building.
 
 **Is this production-ready?** No.  
 **Did I learn a ton building it?** Absolutely.
