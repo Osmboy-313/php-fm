@@ -267,6 +267,27 @@ Resources are configured declaratively.
 Instead of manually wiring controllers, middleware, validation, and actions, each resource describes its behavior in a configuration array.
 
 ```php
+$rules = [
+    "auth" => [
+        "register" => [
+            "username" => "required|username|range:3-32|unique",
+            "email" => "required|email|unique",
+            "user_type" => "required",
+            "password" => "required|range:8-16|", // this trailing pipe "|" won't cause problems btw, just wanted to clarify ;)
+            "confirmPassword" => "required|range:8-16|same:password"
+        ],
+        "login" => [
+            "username" => "required",
+            "email" => "required",
+            "password" => "required",
+        ]
+    ],
+    "category" => [
+
+    ]
+];
+
+// No need for big boy if/else statements for data validation and sanitization, just write rules in this way and done, username, email rules just do regex checks, and unique one checks for availability!
 
 $actions = [
     "single" => [
@@ -282,7 +303,7 @@ $actions = [
 // The Keys inside the single and bulk in the $actions are the actions names we're gonna use in endpoins like "api/category/count"
 // bulk means it will work when no id's are involved "api/category/{id}/count" -> it won't work it will only work when there's no id
 // Single means it will work with id's, "api/category/{id}/validate"
-// And the structure values of the keys are strucutred as: ["Request Method", ["File", "Function"], ["dependency1", "dependency1"]] or no dependency at al!
+// The structure of values that the ation keys should store, means: ["Request Method", ["File", "Function"], ["dependency1", "dependency1"]] or no dependency at al!
 
 $middlewareRegistry = [
     "AuthMiddleware" => ["api/middleware/AuthMiddleware", ["api/Services/AuthService"]],
@@ -290,7 +311,7 @@ $middlewareRegistry = [
     "JwtMiddleware" => ["api/middleware/JwtMiddleware", ["api/Services/JwtService"]],
 ];
 
-// Now Middlewares keys are the same we're gonna use int he $routes, in the register  it contains the files, ["Main File", ["other dependency files"]] or none.
+// Middlewares keys must be the same in the $routes for calling functions. In the register it contains the files, ["Main File", ["other dependency files"]] or none.
 
 $routes = [
     "categories" => [
@@ -303,13 +324,16 @@ $routes = [
                     ["verifyCSRF", []],
                 //  ["function Name", ["args as many"]],
                 ],
+                "JwtMiddleware" => [
+                    ["verifyJwtAccessToken", []], // No args needed here, so leave it empty as-is
+                ],
             ],
             "after" => [
                 
             ]
         ],
-        "actions" => search_r($actions, "validate", "count", "silk-worm"),
-        "rules" => $rules["category"],
+        "actions" => search_r($actions, "validate", "count"), // This Magic function will just search for the said keys in array and return with structure of $action as-is but with said keys!
+        "rules" => $rules["category"], // no rules defined for category, right now it won't be a problem but I'd fix it and make it stricter
 
     ]
 ];
