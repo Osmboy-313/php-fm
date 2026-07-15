@@ -112,7 +112,7 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
           Standard Request         Resource Action
                  │                         │
                  ▼                         ▼
-            Service Layer         Action Dispatcher
+          Business Logic         Action Dispatcher
                  │                         │
                  └────────────┬────────────┘
                               ▼
@@ -174,14 +174,14 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
                                     Standard Request          Resource Action
                                             │                           │
                                             ▼                           ▼
-                                     Service Layer         Action Dispatcher
+                                       Business Logic         Action Dispatcher
                                             │                           │
                                             └─────────────┬─────────────┘
                                                           ▼
                                                   Repository Layer
                                                           │
                                                           ▼
-                                                    Database
+                                                       Database
                                                           │
                                                           ▼
                                                  Business Logic
@@ -260,13 +260,13 @@ Instead of manually wiring controllers, middleware, validation, and actions, eac
 $routes = [
     "category" => [
 
-        "controller" => "CategoryController",
+        "controller" => "api/Controllers/CategoryController", // -> have to give relative paths, so that duplicate files don't collide
 
-        "service" => "CategoryService",
+        "service" => "api/Services/CategoryService",
 
-        "repository" => "CategoryRepository",
+        "repository" => "api/Repositories/CategoryRepository",
 
-        "handler" => "handleCategory",
+        "handler" => "handleCategory", // -> Controller function
 
         "middleware" => [
 
