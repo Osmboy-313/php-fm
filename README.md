@@ -1,78 +1,290 @@
 # Osmboy PHP Framework
 
-> A lightweight, custom-built PHP framework exploring the inner workings of web applications.
+A lightweight PHP framework built from scratch to explore how modern backend frameworks work internally.
 
-## What Is This?
+Rather than relying on existing frameworks like Laravel or Symfony, this project implements the core building blocks myself—including routing, middleware, authentication, validation, request handling, and dynamic module loading—to gain a deeper understanding of the request lifecycle.
 
-This is my **learning project**, a PHP framework I built from scratch to understand how modern web frameworks work under the hood. It started as a deep dive into routing, middleware, authentication, and SQL query building.
+> ⚠️ **Note**
+> This project was built primarily for learning and experimentation. It is not intended to replace production frameworks, but to demonstrate my understanding of backend architecture and framework internals.
 
-**Is this production-ready?** No.  
-**Did I learn a ton building it?** Absolutely.
+---
 
-## What I Learned Building This
+# Why I Built This
 
-- **Routing:** How Laravel/Symfony handle URL mapping behind the scenes
-- **Middleware:** The request lifecycle and how to intercept/modify requests
-- **JWT Authentication:** Token generation, verification, and refresh token rotation
-- **Dependency Management:** Why frameworks need autoloading and DI containers
-- **SQL Query Builders:** The complexity of generating dynamic SQL safely
-- **MVC Architecture:** Separating concerns in web applications
+Most developers learn how to *use* frameworks.
 
-## Architecture Overview
+I wanted to learn **how frameworks work.**
+
+Instead of treating routing, middleware, dependency loading, authentication, and validation as black boxes, I implemented them myself to understand how requests flow through a backend application.
+
+The goal wasn't to recreate Laravel feature-for-feature—it was to understand the engineering decisions behind modern backend frameworks.
+
+---
+
+# What This Framework Implements
+
+## Request Routing
+
+- Resource-based REST routing
+- URL parsing and validation
+- Route configuration
+- Resource actions
+- Query parameter parsing
+
+---
+
+## Middleware Pipeline
+
+- Before-request middleware
+- Configurable middleware execution
+- Dependency loading
+- Authentication middleware
+- Authorization middleware
+- Request interception
+
+---
+
+## Authentication
+
+- JWT Access Tokens
+- JWT Refresh Tokens
+- Refresh Token Rotation
+- Secure token verification
+- HTTP-only cookies
+
+---
+
+## Validation
+
+- Rule-based validation
+- Custom validation rules
+- Username validation
+- Email validation
+- Length validation
+- Unique field validation
+- Password confirmation
+
+---
+
+## Security
+
+- CSRF Tokens
+- Password Hashing
+- Prepared Statements
+- JWT Signature Verification
+
+---
+
+## Dynamic File Loading
+
+Instead of hardcoding file paths throughout the project, the framework scans the project once, builds an internal registry, and dynamically loads controllers, services, middleware, repositories, and utilities when they're needed.
+
+This keeps routing configuration clean and avoids repetitive `require_once` statements.
+
+---
+
+# Request Lifecycle
+
+```
+Incoming HTTP Request
+        │
+        ▼
+REST Router
+        │
+        ▼
+Parse URL
+        │
+        ▼
+Validate Route
+        │
+        ▼
+Load Required Files
+        │
+        ▼
+Run Before Middleware
+        │
+        ▼
+Controller
+        │
+        ▼
+Action Dispatcher
+        │
+        ▼
+Service Layer
+        │
+        ▼
+Repository / Database
+        │
+        ▼
+Build HTTP Response
+        │
+        ▼
+JSON Response
+```
+
+---
+
+# Project Structure
+
 ```
 root/
+│
 ├── core/
-│ ├── Loader/ # Custom file autoloader
-│ ├── Actions/ # Action/controller dispatcher
-│ ├── Middleware/ # Middleware runner
-│ ├── Routers/ # Resource based REST and RPC router implementations
-│ └── Http/ # Request/Response handling
+│   ├── Loader/
+│   │   └── Dynamic file registry & loader
+│   │
+│   ├── Routers/
+│   │   ├── REST Router
+│   │   └── RPC Router
+│   │
+│   ├── Middleware/
+│   │   └── Middleware execution pipeline
+│   │
+│   ├── Actions/
+│   │   └── Action dispatcher
+│   │
+│   └── Http/
+│       ├── Request
+│       ├── Response
+│       └── Exception handling
+│
 ├── utils/
-│ ├── jwt.php # JWT generation and verification
-│ ├── validator.php # Form/input validation
-│ ├── csrf.php # CSRF token handling
-│ └── user-agent.php # Browser/OS detection
-└── bootstrap.php # Framework entry point
+│   ├── JWT
+│   ├── Validator
+│   ├── CSRF
+│   └── User Agent Parser
+│
+└── bootstrap.php
 ```
 
+---
 
-## Core Features
+# Core Features
 
 | Feature | Description |
-|---------|-------------|
-| **REST Router** | Declarative routing with resource-based endpoints |
-| **Middleware System** | Before/after hooks for request processing |
-| **JWT Authentication** | Access + refresh tokens with rotation |
-| **CSRF Protection** | Token-based security for state-changing requests |
-| **Input Validation** | Rule-based validation with custom rules |
-| **File Autoloader** | Custom registry-based file loading |
-| **Error Handling** | Structured JSON responses with proper HTTP status codes |
+|----------|-------------|
+| REST Router | Resource-based routing with configurable endpoints |
+| Middleware | Before-request middleware pipeline |
+| Dynamic Loader | Registry-based file loading without hardcoded paths |
+| JWT Authentication | Access & Refresh Tokens with rotation |
+| Validation Engine | Rule-based input validation |
+| CSRF Protection | Session-based CSRF token generation |
+| Request Parsing | URL and query parameter parsing |
+| Structured Responses | Consistent JSON response format |
+| Action Dispatcher | Configurable resource actions |
 
-## Example Usage
+---
 
-### Defining Routes
+# Example Resource Configuration
+
+Resources are configured declaratively.
+
+Instead of manually wiring controllers, middleware, validation, and actions, each resource describes its behavior in a configuration array.
 
 ```php
 $routes = [
     "category" => [
+
         "controller" => "CategoryController",
+
+        "service" => "CategoryService",
+
+        "repository" => "CategoryRepository",
+
         "handler" => "handleCategory",
+
         "middleware" => [
+
             "before" => [
+
                 "AuthMiddleware" => [
-                    "dependencies" => ["AuthService"],
+
+                    "dependencies" => [
+                        "AuthService"
+                    ],
+
                     "functions" => [
-                        ["func" => "session_require_login", "args" => true]
+
+                        [
+                            "func" => "session_require_login",
+                            "args" => true
+                        ]
+
                     ]
+
                 ]
+
             ]
+
         ],
+
         "actions" => [
+
             "bulk" => [
-                "count" => ["GET", ["ActionService", "countTotalRecords"], []]
+
+                "count" => [
+                    "GET",
+                    ["ActionService", "countTotalRecords"],
+                    []
+                ]
+
             ]
+
         ]
+
     ]
 ];
 ```
 
+---
+
+# Technologies
+
+- PHP
+- MySQL
+- JWT
+- REST APIs
+- Procedural PHP
+- MVC Architecture
+
+---
+
+# What I Learned
+
+Building this framework helped me understand:
+
+- How routing systems work internally
+- How middleware pipelines execute requests
+- How JWT authentication is implemented
+- Refresh token rotation
+- Dynamic module loading
+- Request/response lifecycles
+- Validation engines
+- Backend architecture
+- Modular application design
+
+---
+
+# Future Improvements
+
+Some ideas I'd like to explore in the future:
+
+- Dependency Injection Container
+- PSR Compliance
+- Composer Autoloading
+- Event System
+- Service Providers
+- Unit Testing
+- Better Exception Handling
+- Caching Layer
+- Rate Limiting
+- Logging
+- CLI Commands
+
+---
+
+# Disclaimer
+
+This framework was built as a personal engineering project to better understand backend architecture.
+
+Its purpose is educational and experimental rather than production use, but the concepts implemented here mirror many of the building blocks found in modern PHP frameworks.
