@@ -101,7 +101,7 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
                  Execute Before Middleware
                               │
                               ▼
-                  Load Required Controlllers, business logic and etc defined in the routes
+                  Load Route Dependencies
                               │
                               ▼
                     Dispatch Controller
@@ -112,14 +112,14 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
           Standard Request         Resource Action
                  │                         │
                  ▼                         ▼
-          Business Logic         Action Dispatcher
+          Service Layer         Action Dispatcher
                  │                         │
                  └────────────┬────────────┘
                               ▼
                     Repository / Database
                               │
                               ▼
-                      Business Logic
+                        Service Layer
                               │
                               ▼
                          Controller
@@ -174,7 +174,7 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
                                     Standard Request          Resource Action
                                             │                           │
                                             ▼                           ▼
-                                       Business Logic         Action Dispatcher
+                                       Service Layer         Action Dispatcher
                                             │                           │
                                             └─────────────┬─────────────┘
                                                           ▼
@@ -184,7 +184,7 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
                                                        Database
                                                           │
                                                           ▼
-                                                 Business Logic
+                                                    Service Layer
                                                           │
                                                           ▼
                                                      Controller
@@ -199,6 +199,16 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
                                                      Send Response
 ```
 ---
+
+# Design Philosophy
+
+- The framework is intentionally configuration-driven.
+- Rather than hardcoding controllers, middleware, validation rules, and actions throughout the application, resources describe their behavior declaratively through configuration arrays.
+- The framework interprets those configurations and coordinates the request lifecycle automatically.
+- This approach reduces repetitive boilerplate while keeping application logic modular.
+
+---
+
 # Project Structure
 
 ```
@@ -260,7 +270,7 @@ Instead of manually wiring controllers, middleware, validation, and actions, eac
 $routes = [
     "category" => [
 
-        "controller" => "api/Controllers/CategoryController", // -> have to give relative paths, so that duplicate files don't collide
+        "controller" => "api/Controllers/CategoryController", // -> Relative paths are used to avoid collisions between files with identical names in different directories.
 
         "service" => "api/Services/CategoryService",
 
@@ -324,19 +334,18 @@ $routes = [
 
 ---
 
-# What I Learned
+## Engineering Concepts Explored
 
-Building this framework helped me understand:
+Building this framework required implementing several backend concepts from scratch:
 
-- How routing systems work internally
-- How middleware pipelines execute requests
-- How JWT authentication is implemented
-- Refresh token rotation
+- Request lifecycle management
+- Resource-based routing
+- Middleware execution pipelines
+- JWT authentication and refresh token rotation
 - Dynamic module loading
-- Request/response lifecycles
-- Validation engines
-- Backend architecture
-- Modular application design
+- Validation engine
+- HTTP request/response handling
+- Modular backend architecture
 
 ---
 
