@@ -2,7 +2,7 @@
 
 A lightweight PHP framework built from scratch to explore how modern backend frameworks work internally.
 
-Rather than relying on existing frameworks like Laravel or Symfony, this project implements the core building blocks myself—including routing, middleware, authentication, validation, request handling, and dynamic module loading—to gain a deeper understanding of the request lifecycle.
+Rather than relying on existing frameworks like Laravel or Symfony, this project implements the core building blocks myself, including routing, middleware, authentication, validation, request handling, and dynamic module loading—to gain a deeper understanding of the request lifecycle.
 
 > ⚠️ **Note**
 > This project was built primarily for learning and experimentation. It is not intended to replace production frameworks, but to demonstrate my understanding of backend architecture and framework internals.
@@ -17,7 +17,7 @@ I wanted to learn **how frameworks work.**
 
 Instead of treating routing, middleware, dependency loading, authentication, and validation as black boxes, I implemented them myself to understand how requests flow through a backend application.
 
-The goal wasn't to recreate Laravel feature-for-feature—it was to understand the engineering decisions behind modern backend frameworks.
+The goal wasn't to recreate Laravel feature-for-feature, it was to understand the engineering decisions behind modern backend frameworks.
 
 ---
 
@@ -85,45 +85,120 @@ This keeps routing configuration clean and avoids repetitive `require_once` stat
 
 # Request Lifecycle
 
-```
-Incoming HTTP Request
-        │
-        ▼
-REST Router
-        │
-        ▼
-Parse URL
-        │
-        ▼
-Validate Route
-        │
-        ▼
-Load Required Files
-        │
-        ▼
-Run Before Middleware
-        │
-        ▼
-Controller
-        │
-        ▼
-Action Dispatcher
-        │
-        ▼
-Service Layer
-        │
-        ▼
-Repository / Database
-        │
-        ▼
-Build HTTP Response
-        │
-        ▼
-JSON Response
+```text
+                     Incoming HTTP Request
+                              │
+                              ▼
+                     Parse & Validate URL
+                              │
+                              ▼
+                     Match Resource Route
+                              │
+                              ▼
+                  Load Required Framework Files
+                              │
+                              ▼
+                 Execute Before Middleware
+                              │
+                              ▼
+                  Load Required Controlllers, business logic and etc defined in the routes
+                              │
+                              ▼
+                    Dispatch Controller
+                              │
+                 ┌────────────┴────────────┐
+                 │                         │
+                 ▼                         ▼
+          Standard Request         Resource Action
+                 │                         │
+                 ▼                         ▼
+            Service Layer         Action Dispatcher
+                 │                         │
+                 └────────────┬────────────┘
+                              ▼
+                    Repository / Database
+                              │
+                              ▼
+                      Business Logic
+                              │
+                              ▼
+                         Controller
+                              │
+                              ▼
+                  Execute After Middleware
+                              │
+                              ▼
+                      Build JSON Response
+                              │
+                              ▼
+                        Send Response
 ```
 
 ---
 
+# Internal Framework Flow
+
+```text
+                       Incoming HTTP Request
+                                │
+                                ▼
+                         REST Router Entry
+                                │
+                                ▼
+                       Parse Incoming URL
+                                │
+                                ▼
+                     Validate Resource Route
+                                │
+                    ┌───────────┴────────────┐
+                    │                        │
+             Invalid Request           Valid Request
+                    │                        │
+                    ▼                        ▼
+           Build Error Response      Load Required Files
+                    │                        │
+                    ▼                        ▼
+                  Exit             Run Before Middleware
+                                             │
+                                ┌────────────┴────────────┐
+                                │                         │
+                        Middleware Failed        Middleware Passed
+                                │                         │
+                                ▼                         ▼
+                     Build Error Response      Dispatch Controller
+                                │                         │
+                                ▼                         ▼
+                              Exit          ┌─────────────┴─────────────┐
+                                            │                           │
+                                            ▼                           ▼
+                                    Standard Request          Resource Action
+                                            │                           │
+                                            ▼                           ▼
+                                     Service Layer         Action Dispatcher
+                                            │                           │
+                                            └─────────────┬─────────────┘
+                                                          ▼
+                                                  Repository Layer
+                                                          │
+                                                          ▼
+                                                    Database
+                                                          │
+                                                          ▼
+                                                 Business Logic
+                                                          │
+                                                          ▼
+                                                     Controller
+                                                          │
+                                                          ▼
+                                            Execute After Middleware
+                                                          │
+                                                          ▼
+                                                Build JSON Response
+                                                          │
+                                                          ▼
+                                                     Send Response
+```
+---
 # Project Structure
 
 ```
