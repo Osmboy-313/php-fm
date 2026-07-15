@@ -337,6 +337,9 @@ $routes = [
 
     ]
 ];
+
+Aight! so when everything is done, we're left with $routes and $middlewareRegister, we have to pass both these and the dirname(__DIR__) to the router, so it can load files and call functions! that's it! 
+
 ```
 
 ---
