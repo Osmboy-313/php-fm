@@ -19,7 +19,7 @@ This is my **learning project**, a PHP framework I built from scratch to underst
 - **MVC Architecture:** Separating concerns in web applications
 
 ## Architecture Overview
-`
+```
 root/
 ├── core/
 │ ├── Loader/ # Custom file autoloader
@@ -32,5 +32,47 @@ root/
 │ ├── validator.php # Form/input validation
 │ ├── csrf.php # CSRF token handling
 │ └── user-agent.php # Browser/OS detection
-└── bootstrap.php # Framework entry point`
-`
+└── bootstrap.php # Framework entry point
+```
+
+
+## Core Features
+
+| Feature | Description |
+|---------|-------------|
+| **REST Router** | Declarative routing with resource-based endpoints |
+| **Middleware System** | Before/after hooks for request processing |
+| **JWT Authentication** | Access + refresh tokens with rotation |
+| **CSRF Protection** | Token-based security for state-changing requests |
+| **Input Validation** | Rule-based validation with custom rules |
+| **File Autoloader** | Custom registry-based file loading |
+| **Error Handling** | Structured JSON responses with proper HTTP status codes |
+
+## Example Usage
+
+### Defining Routes
+
+```php
+$routes = [
+    "category" => [
+        "controller" => "CategoryController",
+        "handler" => "handleCategory",
+        "middleware" => [
+            "before" => [
+                "AuthMiddleware" => [
+                    "dependencies" => ["AuthService"],
+                    "functions" => [
+                        ["func" => "session_require_login", "args" => true]
+                    ]
+                ]
+            ]
+        ],
+        "actions" => [
+            "bulk" => [
+                "count" => ["GET", ["ActionService", "countTotalRecords"], []]
+            ]
+        ]
+    ]
+];
+```
+
