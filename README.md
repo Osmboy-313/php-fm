@@ -267,55 +267,49 @@ Resources are configured declaratively.
 Instead of manually wiring controllers, middleware, validation, and actions, each resource describes its behavior in a configuration array.
 
 ```php
+
+$actions = [
+    "single" => [
+        "validate" => ["POST", ["api/Services/ActionService", "isUnique"], []],
+    ],
+    "bulk" => [
+        "count" => ["GET", ["api/Services/ActionService", "countTotalRecords"], []],
+        "login" => ["POST", ["api/Services/ActionService", "handleLogin"], []],
+        "refreshjwt" => ["POST", ["api/Services/AuthService", "handleRefreshToken"], []],
+    ]    
+];
+
+// The Keys inside the single and bulk in the $actions are the actions names we're gonna use in endpoins like "api/category/count"
+// bulk means it will work when no id's are involved "api/category/{id}/count" -> it won't work it will only work when there's no id
+// Single means it will work with id's, "api/category/{id}/validate"
+// And the structure values of the keys are strucutred as: ["Request Method", ["File", "Function"], ["dependency1", "dependency1"]] or no dependency at al!
+
+$middlewareRegistry = [
+    "AuthMiddleware" => ["api/middleware/AuthMiddleware", ["api/Services/AuthService"]],
+    "CSRFMiddleware" => ["api/middleware/CsrfMiddleware", []],
+    "JwtMiddleware" => ["api/middleware/JwtMiddleware", ["api/Services/JwtService"]],
+];
+
+// Now Middlewares keys are the same we're gonna use int he $routes, in the register  it contains the files, ["Main File", ["other dependency files"]] or none.
+
 $routes = [
-    "category" => [
-
-        "controller" => "api/Controllers/CategoryController", // -> Relative paths are used to avoid collisions between files with identical names in different directories.
-
+    "categories" => [
+        "controller" => "api/Controllers/CategoryController",
+        "handler" => "handleCategory", // ->> Function in the controller
         "service" => "api/Services/CategoryService",
-
-        "repository" => "api/Repositories/CategoryRepository",
-
-        "handler" => "handleCategory", // -> Controller function
-
         "middleware" => [
-
             "before" => [
-
-                "AuthMiddleware" => [
-
-                    "dependencies" => [
-                        "AuthService"
-                    ],
-
-                    "functions" => [
-
-                        [
-                            "func" => "session_require_login",
-                            "args" => true
-                        ]
-
-                    ]
-
-                ]
-
+                "CSRFMiddleware" => [
+                    ["verifyCSRF", []],
+                //  ["function Name", ["args as many"]],
+                ],
+            ],
+            "after" => [
+                
             ]
-
         ],
-
-        "actions" => [
-
-            "bulk" => [
-
-                "count" => [
-                    "GET",
-                    ["ActionService", "countTotalRecords"],
-                    []
-                ]
-
-            ]
-
-        ]
+        "actions" => search_r($actions, "validate", "count", "silk-worm"),
+        "rules" => $rules["category"],
 
     ]
 ];
