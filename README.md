@@ -2,7 +2,7 @@
 
 A lightweight PHP framework built from scratch to explore how modern backend frameworks work internally.
 
-Rather than relying on existing frameworks like Laravel or Symfony, this project implements the core building blocks myself, including routing, middleware, authentication, validation, request handling, and dynamic module loading—to gain a deeper understanding of the request lifecycle.
+Rather than relying on existing frameworks like Laravel or Symfony, this project implements the core building blocks myself, including routing, middleware, authentication, validation, request handling, and dynamic module loading to gain a deeper understanding of the request lifecycle.
 
 > **Note**
 > This project was built primarily for learning and experimentation. It is not intended to replace production frameworks, but to demonstrate my understanding of backend architecture and framework internals.
