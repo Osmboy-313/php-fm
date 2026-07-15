@@ -49,6 +49,8 @@ function &getFileRegistry(string $projectRoot):array {
 }
 
 function requireFile(string|array $files, string $projectRoot){
+    if(isEmpty($files) || isEmpty($projectRoot)) return;
+    
     $registry = &getFileRegistry($projectRoot);
 
     foreach ((array)$files as $file) {

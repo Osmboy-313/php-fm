@@ -108,17 +108,20 @@ function validate($rules, $data = null){
                     break;
                 }
             }
+
+            // here Unique function has to be defined by the user according to their needs like mongo Db or whatever, so.... commenting it right now, maybe would make it an interface, soon!
             
-            if($rule === "unique"){
-                $result = isUnique("users", [$field => $value], "", "");
-                if(!isset($result["isUnique"])) return $result;
+            // if($rule === "unique"){
+            //     $result = isUnique("users", [$field => $value], "", "");
+            //     if(!isset($result["isUnique"])) return $result;
                 
-                $isUnique = $result["isUnique"];
-                if(!$isUnique){
-                    $errors[$field] = "This $field already exists!";
-                    break;
-                }
-            }
+            //     $isUnique = $result["isUnique"];
+            //     if(!$isUnique){
+            //         $errors[$field] = "This $field already exists!";
+            //         break;
+            //     }
+            // }
+            
         }
     }
 

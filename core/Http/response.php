@@ -10,15 +10,15 @@ function buildResponse($data, int $status = 200, string $key = "", bool $flatten
     if(is_string($data) && $flatten) $flatten = false;
 
     if(isEmpty($key) && !$flatten){
-        if(is_array($data)) $key = "data";
-        else if(is_string($data)) $key = "message";
+        if(is_array($data)) $key = $response["success"] ? "data" : "errors";
+        else if(is_string($data)) $key = $response["success"] ? "message" : "error";
     }
 
-
     if($flatten && is_array($data)){
-        foreach($data as $k => $v){
-            $response[$k] = $v;
-        }
+        // foreach($data as $k => $v){
+        //     $response[$k] = $v;
+        // }
+        $response = [...$response, ...$data];
     }else{
         $response[$key] = $data;
     }
@@ -46,6 +46,12 @@ function sendResponse(array $response){
     // header("Content-Type: application/json");
     echo json_encode($response, JSON_PRETTY_PRINT);
     exit;
+}
+
+function isSuccess($response){
+    if(is_array($response) && (isset($response["success"]) && !$response["success"])) return false;
+
+    return true;
 }
 
 ?>

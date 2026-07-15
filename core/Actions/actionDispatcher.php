@@ -19,14 +19,14 @@ function performAction(string $projectRoot, array $action, string $method, strin
         if(isEmpty($mainFile)) return buildResponse("No File/Class Provided For Action!", 404);
 
         $result = requireFile([$mainFile, ...$dep], $projectRoot);
-        if(isset($result["success"]) && !$result["success"]) return $result;
+        if(!isSuccess($result)) return $result;
         if(!function_exists($func)) return buildResponse("Handler for action: '{$actionKey}' doesn't exist!", 404);
 
         $result = $func($table, $data, $rules, $id);
         return $result;
-
     } catch(Exception $e){
-        return buildResponse("Dispatching Actions Failed: " . $e->getMessage(), 500);
+        // log($e->getMessage()); ->> for future logging!
+        return buildResponse("Dispatching Actions Failed: ", 500);
     }
 }
 

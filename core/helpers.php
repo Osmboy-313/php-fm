@@ -9,8 +9,7 @@
 //         "isUnique" => [],
 //     ],
 // ];
-// If I want to search for validate then it will return the array with that same strucutre
-
+// If I want to search for the key "validate" in the $actions array then it will return the array with that same strucutre
 
 
 function search_r(array $array, ...$rest){
@@ -56,63 +55,4 @@ function isEmpty($subject, bool $strict = false){
     }
 
     return false;
-}
-
-
-function findFile(string $root, string $fileName){
-    static $cache = [];
-
-    if (isset($cache[$fileName])) {
-        return $cache[$fileName];
-    }
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(
-            $root,
-            RecursiveDirectoryIterator::SKIP_DOTS
-        )
-    );
-
-    foreach ($iterator as $file) {
-        if (
-            $file->isFile() &&
-            $file->getExtension() === 'php' &&
-            $file->getBasename('.php') === $fileName
-        ) {
-            return $cache[$fileName] = $file->getPathname();
-        }
-    }
-
-    // throw new Exception("File '{$fileName}.php' not found.");
-    // abort("File '{$fileName}.php' not found.", 404);
-    return buildResponse("File '{$fileName}.php' not found.", 404);
-}
-
-
-function buildIndex(string $root): array
-{
-    $index = [];
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(
-            $root,
-            RecursiveDirectoryIterator::SKIP_DOTS
-        )
-    );
-
-
-
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getExtension() === 'php') {
-            $index[$file->getBasename('.php')] = $file->getPathname();
-        }
-
-        $name = $file->getBasename('.php');
-        if (isset($index[$name])) {
-            die("Duplicate class name: $name");
-        }
-        $index[$name] = $file->getPathname();
-    }
-
-    return $index;
 }

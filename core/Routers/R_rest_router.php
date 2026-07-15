@@ -1,43 +1,31 @@
 <?php
 
 
-function resource_rest_router(array $routes, string $projectRoot){
+function resource_rest_router(array $routes, array $middlewareRegistry, string $projectRoot){
 
     $parsedRequest = parseRequest(array_keys($routes));
-    if(isset($parsedRequest["success"]) && !$parsedRequest["success"]) sendResponse($parsedRequest);
+    if(!isSuccess($parsedRequest)) sendResponse($parsedRequest);
 
 
     $validatedRequest = validateRequest($routes, $parsedRequest);
-    if(isset($validatedRequest["success"]) && !$validatedRequest["success"]) sendResponse($validatedRequest);
+    if(!isSuccess($validatedRequest)) sendResponse($validatedRequest);
 
     $resource = $validatedRequest["resource"];
     if(isEmpty($resource)) sendResponse(buildResponse("Resource not found!", 404));
 
-    $middlewares = $routes[$resource]["middleware"];
-    $response = runMiddleware($middlewares["before"], $projectRoot);
-    if(isset($response["success"]) && !$response["success"]) sendResponse($response);
+    $middlewares = $routes[$resource]["middleware"] ?? "";
 
+    // Note: I can use try catch method if I use abort() function otherwise the success checks work! So there is flexibility.
 
-    // Note: I can use try catch method if I use abort() functin otherwise the success checks work! So there is flexibility.
-    // try{
-    //     runMiddleware($middlewares["before"]);
-    // }catch(Exception $e){
-    //     // response(["massage" => $e->getMessage()], 400);
-    // }
+    // Well Im using try catch as well, let's say the user uses the abort() functiosn then there must be somethinhg to catch that, so catchng that right now, and also supporting the isset and false checks inside the try, now all good! 
+
+    try{
+        $middlewareResponse = runMiddleware($middlewares["before"], $middlewareRegistry, $projectRoot);
+        if(!isSuccess($middlewareResponse)) sendResponse($middlewareResponse);
     
-    
-
-
-    // $controller = __DIR__ . "/../../controllers/{$routes[$resource]['controller']}.php";
-    // $service = __DIR__ . "/../../Services/{$routes[$resource]['service']}.php";
-    // // $repository = __DIR__ . "/../../Services/{$routes[$resource]['service']}.php";
-    // if(!file_exists($controller)) sendResponse(buildResponse("Controller file missing: $controller", 404));
-    // if(!file_exists($service)) sendResponse(buildResponse("Service file missing: $service", 404));
-    // // if(!file_exists($repository)) sendResponse(buildResponse("Service file missing: $service", 404));
-    // require_once $controller;
-    // require_once $service;
-    // // require_once $repository;
-
+    }catch(Exception $e){
+        sendResponse((array) $e);
+    }
 
     requireFile([
             $routes[$resource]["controller"] ?? "",
@@ -47,14 +35,29 @@ function resource_rest_router(array $routes, string $projectRoot){
         $projectRoot
     );
 
-
-    // $handler = "handle_$resource";
     $handler = $routes[$resource]["handler"] ?? "";
-    $rules = $routes[$resource]["rules"] ?? "";
     if(isEmpty($handler) || !function_exists($handler)) sendResponse(buildResponse('Handler not found!', 404));
+    
+    $rules = $routes[$resource]["rules"] ?? "";
+    $controllerResponse = [];
 
-    $response = $handler($projectRoot, $parsedRequest["method"], $validatedRequest["id"], $validatedRequest["action"], $parsedRequest["queryParams"], $rules);
-    sendResponse($response);
+    // Both checks cuz the user might be doing anything "return BuildResponse()" or using abort(), so....
+
+    try{
+        $controllerResponse = $handler($projectRoot, $parsedRequest["method"], $validatedRequest["id"], $validatedRequest["action"], $parsedRequest["queryParams"], $rules);
+        if(!isSuccess($controllerResponse)) sendResponse($controllerResponse);
+        if(isEmpty($controllerResponse)) $controllerResponse = [];
+
+    }catch(Exception $e){
+        sendResponse((array) $e);
+    }
+
+    if(isset($middlewares["after"]) && !isEmpty($middlewares["after"])){
+        $afterMiddlewareResponse = runMiddleware($middlewares["after"], $middlewareRegistry, $projectRoot, $controllerResponse);
+        sendResponse($afterMiddlewareResponse);
+    }
+
+    sendResponse($controllerResponse);
 }
 
 function parseRequest($allowedRoutes){

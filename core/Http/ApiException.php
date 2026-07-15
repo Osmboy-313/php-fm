@@ -1,6 +1,6 @@
 <?php
 
-// The only OOP code in my entire procedural project!
+// The only OOP code in my entire procedural project -____-
 
 class ApiException extends Exception
 {

@@ -74,8 +74,8 @@ function setTokenCookie($name, $token, $expiry){
     setcookie($name, $token, [
         'expires'  => time() + $expiry,
         'path'     => '/',
-        'domain'   => '',           // empty = current domain
-        'secure'   => false,        // set to true when you have HTTPS
+        'domain'   => '',
+        'secure'   => false,
         'httponly' => true,
         'samesite' => 'Lax'
     ]);
@@ -91,11 +91,14 @@ function implementTokens(array $payload, int $accessTokenExpiry = 900, int $refr
     $refreshToken = generateJwt($payload, $refreshSecret, $refreshTokenExpiry);
 
     // This SaveRefreshToken Function is a function in JwtService, that first deletes the existing ones, if they exist otherwise just create a new one! so each one we delete and make a new one, also known as rotation ;)
-    $result = saveRefreshToken($payload["sub"], $refreshToken, $refreshTokenExpiry, $oldRefreshToken);
-    if(isset($result["success"]) && !$result["success"]) return $result;
 
-    setTokenCookie("ACCESS_TOKEN", $accessToken, $accessTokenExpiry);
-    setTokenCookie("REFRESH_TOKEN", $refreshToken, $refreshTokenExpiry);
+    // Changing it btw right now!
+
+    // $result = saveRefreshToken($payload["sub"], $refreshToken, $refreshTokenExpiry, $oldRefreshToken);
+    // if(isset($result["success"]) && !$result["success"]) return $result;
+
+    // setTokenCookie("ACCESS_TOKEN", $accessToken, $accessTokenExpiry);
+    // setTokenCookie("REFRESH_TOKEN", $refreshToken, $refreshTokenExpiry);
 }
 
 function removeTokenCookies(){
@@ -103,6 +106,9 @@ function removeTokenCookies(){
     setcookie("REFRESH_TOKEN", "", time() - 3600, "/");
 }
 
+
+
+// ==== The Other Jwt Functions like that handle the refresh rotations are in the service of an app, not in the framework itself, but Im thinking about adding interfaces here so whoever uses, will make those functions and add their own logic, like sacing in redis or cache instead of DB, so no hardcoding or rigidity! ===
 
 
 ?>
