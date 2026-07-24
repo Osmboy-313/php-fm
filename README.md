@@ -1,4 +1,4 @@
-# Osmboy PHP Framework
+# Custom PHP Framework
 
 A lightweight PHP framework built from scratch to explore how modern backend frameworks work internally.
 
